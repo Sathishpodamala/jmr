@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @ToString(exclude = "customer")
+@Builder
 public class Account {
 
     @Id
@@ -32,5 +33,7 @@ public class Account {
     @JoinColumn(name = "customer_id")
     private Customer customer;
 
-
+    @OneToOne(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @JoinColumn(name="fd_id")
+    private FixedDeposit fixedDeposit;
 }

@@ -32,8 +32,11 @@ public class Customer {
 
     private boolean active;
     private String role;
-    @OneToOne(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.ALL,fetch = FetchType.EAGER,optional = false)
     @JoinColumn(name = "account_Number")
     private Account account;
+
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    private CustomerAcquisition acquisition;
 
 }

@@ -16,8 +16,8 @@ public class CustomerAcquisition {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private LocalDate date;
-    @OneToMany
+    @OneToMany(mappedBy = "acquisition")
     private List<Customer>onBoarded=new ArrayList<>();
-    @OneToMany
+    @OneToMany(mappedBy = "acquisition")
     private List<Customer>offBoarded=new ArrayList<>();
 }

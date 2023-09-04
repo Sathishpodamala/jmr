@@ -12,4 +12,5 @@ public class AccountDTO {
     private LocalDateTime createdAt;
     private boolean active;
     private double income;
+    private FixedDepositDTO fixedDeposit;
 }

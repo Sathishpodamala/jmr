@@ -7,8 +7,10 @@ import com.bank.jmr.exception.CustomerCustomException;
 import com.bank.jmr.repository.AccountRepository;
 import com.bank.jmr.repository.CustomerAcquisitionRepository;
 import com.bank.jmr.repository.CustomerRepository;
+import com.bank.jmr.util.IncomeGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -20,38 +22,24 @@ import java.util.Optional;
 @Service
 public class CustomerService {
 
+    @Value("${bank.customers.on-boarding}")
+    private int maxCustomerOnBoardingPerDay;
     private CustomerRepository customerRepository;
     private AccountRepository accountRepository;
 
     private CustomerAcquisitionRepository acquisitionRepository;
+    private IncomeGenerator incomeGenerator;
 
     @Autowired
-    public CustomerService(CustomerRepository customerRepository, AccountRepository accountRepository,CustomerAcquisitionRepository acquisitionRepository) {
+    public CustomerService(CustomerRepository customerRepository, AccountRepository accountRepository,
+                           CustomerAcquisitionRepository acquisitionRepository,IncomeGenerator incomeGenerator) {
         this.customerRepository = customerRepository;
         this.accountRepository = accountRepository;
         this.acquisitionRepository=acquisitionRepository;
+        this.incomeGenerator=incomeGenerator;
     }
 
     public Customer saveCustomer(Customer customer) {
-        Customer customerExists = customerRepository.checkCustomerExists(customer.getUserName(), customer.getMobileNumber(), customer.getEmail(), customer.getAadharNumber());
-        if (customerExists != null) {
-            throw new CustomerCustomException("User Already Exists with same details");
-        }
-
-
-
-        customer.setActive(true);
-        customer.setRole("USER");
-        if (customer.getAccount() != null) {
-            Account account = customer.getAccount();
-            account.setCustomer(customer);
-            account.setActive(true);
-            account.setCreatedAt(LocalDateTime.now());
-            account.setIncome(100.00);
-        }
-
-        log.info("\nService : \n" + customer);
-        Customer savedCustomer = customerRepository.save(customer);
 
         if(!acquisitionRepository.existsByDate(LocalDate.now()))
         {
@@ -60,8 +48,32 @@ public class CustomerService {
             acquisitionRepository.save(acquisition);
         }
         CustomerAcquisition todayAcquisition = acquisitionRepository.findByDate(LocalDate.now());
-        todayAcquisition.getOnBoarded().add(savedCustomer);
-        acquisitionRepository.save(todayAcquisition);
+        if(todayAcquisition.getOnBoarded().size()>=maxCustomerOnBoardingPerDay)
+        {
+            throw new CustomerCustomException("Reached new customers On-Boarding limit Try tomorrow");
+        }
+
+        Customer customerExists = customerRepository.checkCustomerExists(customer.getUserName(), customer.getMobileNumber(), customer.getEmail(), customer.getAadharNumber());
+        if (customerExists != null) {
+            throw new CustomerCustomException("User Already Exists with same details");
+        }
+
+        customer.setAcquisition(todayAcquisition);
+        customer.setActive(true);
+        customer.setRole("USER");
+        Account account=Account.builder()
+                .customer(customer)
+                .active(true)
+                .createdAt(LocalDateTime.now())
+                .income(incomeGenerator.getRandomIncome())
+                .build();
+        customer.setAccount(account);
+
+        Customer savedCustomer = customerRepository.save(customer);
+
+
+        //todayAcquisition.getOnBoarded().add(savedCustomer);
+        //acquisitionRepository.save(todayAcquisition);
 
         return savedCustomer;
     }

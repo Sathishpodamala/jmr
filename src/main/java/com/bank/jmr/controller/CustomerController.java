@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 @Slf4j
@@ -31,7 +32,7 @@ public class CustomerController {
     }
 
     @PostMapping("/save")
-    public CustomerDTO saveCustomer( @RequestBody CustomerDTO customerDTO) {
+    public CustomerDTO saveCustomer( @Valid @RequestBody CustomerDTO customerDTO) {
 
         Customer customer = modelMapper.map(customerDTO, Customer.class);
 
@@ -44,7 +45,6 @@ public class CustomerController {
     @GetMapping("/{id}")
     public CustomerDTO getCustomerById(@PathVariable long id) {
         Customer customer = customerService.getCustomerById(id);
-        log.info(customer.toString());
         return modelMapper.map(customer, CustomerDTO.class);
     }
 
@@ -62,5 +62,14 @@ public class CustomerController {
                 .collect(Collectors.toList());
     }
 
-
+    @PostMapping("/bulk")
+    public List<CustomerDTO> bulkRegistration(@RequestBody List<CustomerDTO>bulkCustomersDtos)
+    {
+        List<CustomerDTO>savedCustomers=new ArrayList<>();
+       for(CustomerDTO customerDTO:bulkCustomersDtos)
+       {
+           savedCustomers.add(saveCustomer(customerDTO));
+       }
+        return savedCustomers;
+    }
 }

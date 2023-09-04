@@ -65,4 +65,15 @@ public class DtoToEntityMapping {
 
         assertEquals(customer.isActive(),customer.isActive());
     }
+
+    @Test
+    public void calculatePercentage()
+    {
+        double percentage=50;
+        double income=20000;
+        double maxDeposit = percentage / 100.0 * income;
+        System.out.println(percentage / 100.0);
+        System.out.println(((percentage / 100.0) * income));
+        assertEquals(10000,maxDeposit);
+    }
 }

@@ -1,9 +1,7 @@
 package com.bank.jmr.dto;
 
-import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,17 +15,18 @@ public class CustomerDTO {
     private long id;
     @NotBlank
     private String firstName;
-    @NotNull
+    @NotBlank
     private String lastName;
-    @NotNull
+    @NotBlank
     private String userName;
     @NotBlank
     private String password;
-    @Digits(integer = 10,fraction = 0,message = "10 Digit Mobile Number")
+    @NotBlank
     private String mobileNumber;
     @Email
+    @NotBlank
     private String email;
-    @Digits(integer = 12,fraction = 0,message = "12 Digit Aadhar Number")
+    @NotBlank
     private String aadharNumber;
     private boolean active;
 
